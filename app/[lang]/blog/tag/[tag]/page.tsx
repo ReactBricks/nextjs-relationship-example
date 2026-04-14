@@ -12,7 +12,7 @@ const getData = async (
   locale: string
 ): Promise<{
   pagesByTag: types.PageFromList[] | null
-  tags: string[] | null
+  categories: Array<{ name: string; slug: string }> | null
   errorNoKeys: boolean
   errorPage: boolean
 }> => {
@@ -24,40 +24,48 @@ const getData = async (
 
     return {
       pagesByTag: null,
-      tags: null,
+      categories: null,
       errorNoKeys,
       errorPage,
     }
   }
 
-  const [pagesByTag, tags] = await Promise.all([
-    fetchPages({
-      tag: tag.toString(),
+  const categoriesPages = await fetchPages({
+    type: 'category',
+    pageSize: 1000,
+    config,
+    fetchOptions: { next: { revalidate: 3 } },
+  }).catch(() => {
+    errorPage = true
+    return null
+  })
+
+  const currentCategory = categoriesPages?.find(
+    (category) => category.slug === tag
+  )
+
+  const pagesByTag =
+    currentCategory &&
+    (await fetchPages({
+      filterBy: {
+        category: `${currentCategory.id}_${currentCategory.language}`,
+      },
       type: 'blog',
       pageSize: 1000,
       sort: '-publishedAt',
       config,
-      fetchOptions: { next: { revalidate: 3 } },
     }).catch(() => {
       errorPage = true
       return null
-    }),
-    fetchTags({
-      page: undefined,
-      pageSize: undefined,
-      filterBy: undefined,
-      fetchOptions: {
-        next: {
-          revalidate: 3,
-        },
-      },
-      config,
-    }),
-  ])
+    }))
+
+  const categories = categoriesPages
+    ?.map((page) => ({ name: page.name, slug: page.slug }))
+    .sort()
 
   return {
-    pagesByTag,
-    tags: tags.items.sort(),
+    pagesByTag: pagesByTag || null,
+    categories: categories || null,
     errorNoKeys,
     errorPage,
   }
@@ -98,7 +106,7 @@ export default async function Page(props: {
   params: Promise<{ lang: string; tag: string }>
 }) {
   const params = await props.params
-  const { pagesByTag, tags, errorNoKeys } = await getData(
+  const { pagesByTag, categories, errorNoKeys } = await getData(
     params.tag,
     params.lang
   )
@@ -125,8 +133,12 @@ export default async function Page(props: {
               </div>
 
               <div className="flex flex-wrap items-center">
-                {tags?.map((tag) => (
-                  <TagListItem tag={tag} key={tag} />
+                {categories?.map((category) => (
+                  <TagListItem
+                    name={category.name}
+                    slug={category.slug}
+                    key={category.slug}
+                  />
                 ))}
               </div>
 

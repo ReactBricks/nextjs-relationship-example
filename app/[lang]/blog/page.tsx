@@ -10,7 +10,7 @@ const getData = async (
   locale: string
 ): Promise<{
   posts: types.PageFromList[] | null
-  tags: string[] | null
+  categories: Array<{ name: string; slug: string }> | null
   errorNoKeys: boolean
   errorPage: boolean
 }> => {
@@ -22,23 +22,21 @@ const getData = async (
 
     return {
       posts: null,
-      tags: null,
+      categories: null,
       errorNoKeys,
       errorPage,
     }
   }
 
-  const [tags, posts] = await Promise.all([
-    fetchTags({
-      page: undefined,
-      pageSize: undefined,
-      filterBy: undefined,
-      fetchOptions: {
-        next: {
-          revalidate: 3,
-        },
-      },
+  const [categoriesPages, posts] = await Promise.all([
+    fetchPages({
+      type: 'category',
+      pageSize: 1000,
       config,
+      fetchOptions: { next: { revalidate: 3 } },
+    }).catch(() => {
+      errorPage = true
+      return null
     }),
     fetchPages({
       type: 'blog',
@@ -53,9 +51,13 @@ const getData = async (
     }),
   ])
 
+  const categories = categoriesPages
+    ?.map((page) => ({ name: page.name, slug: page.slug }))
+    .sort()
+
   return {
     posts,
-    tags: tags.items.sort(),
+    categories: categories || null,
     errorNoKeys,
     errorPage,
   }
@@ -72,7 +74,7 @@ export default async function Page(props: {
   params: Promise<{ lang: string }>
 }) {
   const params = await props.params
-  const { tags, posts, errorNoKeys } = await getData(params.lang)
+  const { categories, posts, errorNoKeys } = await getData(params.lang)
 
   return (
     <>
@@ -85,8 +87,12 @@ export default async function Page(props: {
               </h1>
 
               <div className="flex flex-wrap items-center">
-                {tags?.map((tag) => (
-                  <TagListItem tag={tag} key={tag} />
+                {categories?.map((category) => (
+                  <TagListItem
+                    name={category.name}
+                    slug={category.slug}
+                    key={category.slug}
+                  />
                 ))}
               </div>
 

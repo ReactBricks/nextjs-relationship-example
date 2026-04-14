@@ -1,8 +1,9 @@
 {
-  "name": "20260414-nextjs-app-relationship",
+  "name": "nextjs-relationship-example",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "version": "0.1.1",
+  "author": "",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
@@ -32,5 +33,10 @@
     "tailwindcss": "^4.1.5",
     "typescript": "^5"
   },
-  "author": ""
+  "prettier": {
+    "printWidth": 80,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
 }
