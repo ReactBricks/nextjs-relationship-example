@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { fetchPages, fetchTags, types } from 'react-bricks/rsc'
+import { fetchPages, types } from 'react-bricks/rsc'
 
 import PostListItem from '@/components/PostListItem'
 import TagListItem from '@/components/TagListItem'

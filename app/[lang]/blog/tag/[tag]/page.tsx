@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { fetchPages, fetchTags, types } from 'react-bricks/rsc'
+import { fetchPages, types } from 'react-bricks/rsc'
 
 import PostListItem from '@/components/PostListItem'
 import TagListItem from '@/components/TagListItem'
@@ -11,6 +11,7 @@ const getData = async (
   tag: string,
   locale: string
 ): Promise<{
+  tagName: string | null
   pagesByTag: types.PageFromList[] | null
   categories: Array<{ name: string; slug: string }> | null
   errorNoKeys: boolean
@@ -23,6 +24,7 @@ const getData = async (
     errorNoKeys = true
 
     return {
+      tagName: null,
       pagesByTag: null,
       categories: null,
       errorNoKeys,
@@ -64,6 +66,7 @@ const getData = async (
     .sort()
 
   return {
+    tagName: currentCategory?.name || null,
     pagesByTag: pagesByTag || null,
     categories: categories || null,
     errorNoKeys,
@@ -80,16 +83,14 @@ export async function generateStaticParams({
     return []
   }
 
-  const { items: tags } = await fetchTags({
-    page: undefined,
-    pageSize: undefined,
-    filterBy: {
-      language: params.lang,
-    },
+  const categoriesPages = await fetchPages({
+    type: 'category',
+    pageSize: 1000,
     config,
+    fetchOptions: { next: { revalidate: 3 } },
   })
 
-  return tags
+  return categoriesPages.map((category) => category.slug)
 }
 
 export async function generateMetadata(props: {
@@ -106,7 +107,7 @@ export default async function Page(props: {
   params: Promise<{ lang: string; tag: string }>
 }) {
   const params = await props.params
-  const { pagesByTag, categories, errorNoKeys } = await getData(
+  const { tagName, pagesByTag, categories, errorNoKeys } = await getData(
     params.tag,
     params.lang
   )
@@ -121,7 +122,7 @@ export default async function Page(props: {
             <div className="max-w-6xl mx-auto px-8 py-16">
               <div className="flex items-center justify-between  text-gray-900 dark:text-white pb-4 mt-10 sm:mt-12 mb-4">
                 <h1 className="max-w-2xl text-4xl sm:text-6xl lg:text-4xl font-bold tracking-tight">
-                  {tag} articles
+                  {tagName} articles
                 </h1>
 
                 <Link
