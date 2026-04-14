@@ -1,0 +1,36 @@
+{
+  "name": "20260414-nextjs-app-relationship",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "version": "0.1.1",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@reactbricks/reactbricks-ui-rsc": "*",
+    "dayjs": "^1.11.13",
+    "next": "^15.5.12",
+    "next-themes": "^0.4.6",
+    "react": "^19.0.0",
+    "react-bricks": "5.1.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.14",
+    "@types/node": "^22.19.11",
+    "@types/prismjs": "^1.26.6",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "@types/react-slick": "^0.23.13",
+    "eslint": "^9.22.0",
+    "eslint-config-next": "15.2.9",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.5",
+    "typescript": "^5"
+  },
+  "author": ""
+}
