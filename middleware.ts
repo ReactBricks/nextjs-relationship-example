@@ -1,45 +1,24 @@
-import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import {
+  chain,
+  createWithAbTestingMiddleware,
+  createI18nMiddleware,
+} from 'react-bricks/rsc'
 
-import { i18n } from './i18n-config'
+import { i18n } from '@/i18n-config'
+import rbConfig, { abTestingEnabled } from '@/react-bricks/config'
 
-export function middleware(request: NextRequest) {
-  // Check if there is any supported locale in the pathname
-  const pathname = request.nextUrl.pathname
+const withAbTestingMiddleware = createWithAbTestingMiddleware({
+  i18n,
+  config: rbConfig,
+})
+const withI18nMiddleware = createI18nMiddleware({ i18n, NextResponse })
 
-  // Check if the default locale is in the pathname
-  if (
-    pathname.startsWith(`/${i18n.defaultLocale}/`) ||
-    pathname === `/${i18n.defaultLocale}`
-  ) {
-    // e.g. incoming request is /en/about
-    // The new URL is now /about
-    return NextResponse.redirect(
-      new URL(
-        pathname.replace(
-          `/${i18n.defaultLocale}`,
-          pathname === `/${i18n.defaultLocale}` ? '/' : ''
-        ),
-        request.url
-      )
-    )
-  }
+const middleware = abTestingEnabled
+  ? chain([withAbTestingMiddleware, withI18nMiddleware])
+  : withI18nMiddleware
 
-  const pathnameIsMissingLocale = i18n.locales.every(
-    (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
-  )
-
-  if (pathnameIsMissingLocale) {
-    // We are on the default locale
-    // Rewrite so Next.js understands
-
-    // e.g. incoming request is /about
-    // Tell Next.js it should pretend it's /en/about
-    return NextResponse.rewrite(
-      new URL(`/${i18n.defaultLocale}${pathname}`, request.url)
-    )
-  }
-}
+export default middleware
 
 export const config = {
   // Matcher ignoring `/_next/` and `/api/`

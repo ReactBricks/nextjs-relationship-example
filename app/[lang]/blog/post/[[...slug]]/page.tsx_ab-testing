@@ -13,6 +13,7 @@ import {
 } from 'react-bricks/rsc'
 import { ClickToEdit } from 'react-bricks/rsc/client'
 
+import { BLOG_SLUG_PREFIX } from '@/react-bricks/pageTypes'
 import ErrorNoKeys from '@/components/errorNoKeys'
 import ErrorNoPage from '@/components/errorNoPage'
 import config from '@/react-bricks/config'
@@ -53,13 +54,13 @@ const getData = async (
 
   const cookieStore = await cookies()
   const variantNameFromCookie = getAbTestingCookie({
-    slug: cleanSlug,
+    slug: `${BLOG_SLUG_PREFIX}${cleanSlug}`,
     locale,
     cookieStore,
   })
 
   const page = await fetchPage({
-    slug: cleanSlug,
+    slug: `${BLOG_SLUG_PREFIX}${cleanSlug}`,
     language: locale,
     variantName: variantNameFromCookie,
     config,
@@ -74,7 +75,7 @@ const getData = async (
     errorNoKeys,
     errorPage,
     variantName: variantNameFromCookie,
-    testName: `${cleanSlug}_${locale}`,
+    testName: `${BLOG_SLUG_PREFIX}${cleanSlug}_${locale}`,
   }
 }
 
@@ -87,15 +88,18 @@ export async function generateStaticParams({
     return []
   }
 
-  const allPages = await fetchPages(config.apiKey, {
+  const allPages = await fetchPages({
     language: params.lang,
-    type: 'page',
+    type: 'blog',
+    pageSize: 100,
+    sort: '-publishedAt',
+    config,
   })
 
   const pages = allPages
     .map((page) =>
       page.translations.map((translation) => ({
-        slug: translation.slug === '/' ? [''] : translation.slug.split('/'),
+        slug: translation.slug.replace(BLOG_SLUG_PREFIX, '').split('/'),
       }))
     )
     .flat()

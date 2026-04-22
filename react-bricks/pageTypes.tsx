@@ -1,6 +1,8 @@
 // import {  Body,  Font,  Head,  Html,  pretty,  render,  Section,  Tailwind } from '@react-email/components' <<EMAIL_BRICKS>>
 import { types } from 'react-bricks/rsc'
 
+export const BLOG_SLUG_PREFIX = 'blog/post/'
+
 const pageTypes: types.IPageType[] = [
   {
     name: 'page',
@@ -22,6 +24,7 @@ const pageTypes: types.IPageType[] = [
     defaultLocked: false,
     defaultStatus: types.PageStatus.Published,
     getDefaultContent: () => [],
+    // slugPrefix: { default: BLOG_SLUG_PREFIX }, // TODO - uncomment for ab-testing in blog post pages
     allowedBlockTypes: [
       'title',
       'paragraph',

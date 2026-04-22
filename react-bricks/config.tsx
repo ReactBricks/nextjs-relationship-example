@@ -5,6 +5,11 @@ import bricks from './bricks'
 import pageTypes from './pageTypes'
 import NextLink from './NextLink'
 
+// Enable only for Enterprise plans with the A/B testing module active.
+export const abTestingEnabled = true
+// Time-to-live for the A/B testing cookie, in seconds (default: 2 days).
+export const DEFAULT_AB_TESTING_COOKIE_TTL = 60 * 60 * 24 * 2
+
 const config: types.ReactBricksConfig = {
   appId: process.env.NEXT_PUBLIC_APP_ID || '',
   apiKey: process.env.API_KEY || '',
